@@ -16,6 +16,7 @@
 !collect channel=ライブ emoji=👏,👍 image_only=True
 !collect channel=ライブ emoji=👏👍 from=2024-05-01 to=2024-05-16
 !collect channel="雑談" emoji=👏 show_top_user=True
+```
 
 ## 必要なBot権限
 
