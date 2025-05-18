@@ -31,6 +31,25 @@ def parse_emoji_string(val):
     # 絵文字のみ（空文字の混入防止）
     return [e for e in emojis if e]
 
+def find_channel_by_category_and_name(guild, cat_and_channel):
+    """
+    cat_and_channel: "カテゴリA/general" のような文字列
+    """
+    if "/" in cat_and_channel:
+        category_name, channel_name = cat_and_channel.split("/", 1)
+        category_name = category_name.strip()
+        channel_name = channel_name.strip()
+        for category in guild.categories:
+            if category.name == category_name:
+                for channel in category.text_channels:
+                    if channel.name == channel_name:
+                        return channel
+    else:
+        # "/"が無ければ従来通り
+        return discord.utils.get(guild.text_channels, name=cat_and_channel.strip())
+    return None
+
+
 load_dotenv()
 
 intents = discord.Intents.default()
@@ -53,8 +72,7 @@ def parse_args(args, ctx, bot):
     for arg in args:
         arg = arg.strip()  # ★ ここで空白を一括除去
         if arg.startswith("channel="):
-            val = arg[len("channel="):]
-            val = clean_value(val)
+            val = clean_value(arg[len("channel="):])
             if val.startswith("<#") and val.endswith(">"):
                 channel_id = int(val.strip('<#>'))
                 params["channel"] = bot.get_channel(channel_id)
@@ -62,13 +80,12 @@ def parse_args(args, ctx, bot):
                 channel_id = int(val)
                 params["channel"] = bot.get_channel(channel_id)
             else:
-                ch_name = val.lstrip("#")
-                ch_name = clean_value(ch_name)
-                found = discord.utils.get(ctx.guild.text_channels, name=ch_name)
+                # カテゴリ名/チャンネル名対応
+                found = find_channel_by_category_and_name(ctx.guild, val)
                 if found:
                     params["channel"] = found
                 else:
-                    params["channel"] = ctx.channel
+                    params["channel"] = ctx.channel  # fallback
         elif arg.startswith("user="):
             val = arg[len("user="):].strip()
             if val.startswith("<@") and val.endswith(">"):
