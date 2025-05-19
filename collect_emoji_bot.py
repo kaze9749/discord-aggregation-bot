@@ -16,20 +16,23 @@ def clean_value(s):
     return re.sub(pattern, '', s)
 
 def parse_emoji_string(val):
-    # カンマ・空白両方で区切る
-    # まず不可視文字など消してから
-    val = clean_value(val)
-    # カンマ or 空白でsplit
-    emoji_chunks = re.split(r'[, ]+', val)
-    # 空欄を除いて全部1文字ずつバラす
+    # 前処理（不可視文字や全角スペース除去等）は必要に応じて
+    val = val.strip().replace('\u200b', '')
+    # カンマで区切る（カンマ区切り＋空白区切りの両方をサポートしたい場合は下記コメント参照）
+    chunks = re.split(r'[, ]+', val)
     emojis = []
-    for chunk in emoji_chunks:
+    for chunk in chunks:
         chunk = chunk.strip()
-        if chunk:
-            # 1文字ずつバラす（複数絵文字を連続指定も対応）
-            emojis.extend([e for e in chunk])
-    # 絵文字のみ（空文字の混入防止）
-    return [e for e in emojis if e]
+        if not chunk:
+            continue
+        # カスタム絵文字（:emoji_30: や <a:xxx:12345> も対象）
+        if re.fullmatch(r'<a?:\w+:\d+>', chunk) or re.fullmatch(r':\w+:', chunk):
+            emojis.append(chunk)
+        # 通常のUnicode絵文字（一文字でOK）
+        elif len(chunk) == 1:
+            emojis.append(chunk)
+        # サポート対象外の場合は無視（またはエラーとして通知も可能）
+    return emojis
 
 def find_channel_by_category_and_name(guild, cat_and_channel):
     """
@@ -126,6 +129,7 @@ async def collect(ctx, *args):
     await ctx.send(f'集計開始...（対象: {p["channel"].mention}）')
 
     async for message in p["channel"].history(limit=None, after=start_dt, before=end_dt):
+        print(message)
         if p["user"] and message.author != p["user"]:
             continue
         if p["image_only"]:
@@ -142,6 +146,7 @@ async def collect(ctx, *args):
         if matched:
             user_post_counts[message.author] = user_post_counts.get(message.author, 0) + 1
 
+    print(emoji_counts)
     total_messages = sum(emoji_counts.values())
     if total_messages == 0:
         await ctx.send("該当する投稿が見つかりませんでした。")
