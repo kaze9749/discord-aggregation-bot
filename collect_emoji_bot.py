@@ -129,7 +129,6 @@ async def collect(ctx, *args):
     await ctx.send(f'集計開始...（対象: {p["channel"].mention}）')
 
     async for message in p["channel"].history(limit=None, after=start_dt, before=end_dt):
-        print(message)
         if p["user"] and message.author != p["user"]:
             continue
         if p["image_only"]:
@@ -146,7 +145,6 @@ async def collect(ctx, *args):
         if matched:
             user_post_counts[message.author] = user_post_counts.get(message.author, 0) + 1
 
-    print(emoji_counts)
     total_messages = sum(emoji_counts.values())
     if total_messages == 0:
         await ctx.send("該当する投稿が見つかりませんでした。")
