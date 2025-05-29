@@ -4,8 +4,10 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone
 import time
-
 import re
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import datetime
+
 
 def clean_value(s):
     s = s.strip()
@@ -129,7 +131,6 @@ async def collect(ctx, *args):
     await ctx.send(f'集計開始...（対象: {p["channel"].mention}）')
 
     async for message in p["channel"].history(limit=None, after=start_dt, before=end_dt):
-        print(message)
         if p["user"] and message.author != p["user"]:
             continue
         if p["image_only"]:
@@ -146,7 +147,6 @@ async def collect(ctx, *args):
         if matched:
             user_post_counts[message.author] = user_post_counts.get(message.author, 0) + 1
 
-    print(emoji_counts)
     total_messages = sum(emoji_counts.values())
     if total_messages == 0:
         await ctx.send("該当する投稿が見つかりませんでした。")
@@ -166,5 +166,43 @@ async def collect(ctx, *args):
     results += f"\n処理時間: {elapsed:.2f}秒"
 
     await ctx.send(results)
+
+async def monthly_collect_job():
+    CHANNEL_ID = 1271507705445613589   # 写真館:シャニマス
+    EMOJIS = [':mochi_sakuragi_mano:',':mochi_kazano_hiori:',':mochi_hachimiya_meguru:',':mochi_tsukioka_kogane:',':mochi_tanaka_mamimi:',':mochi_shirase_sakuya:',':mochi_mitsumine_yuika:',':mochi_yukoku_kiriko:',':mochi_komiya_kaho~1:',':mochi_sonoda_chiyoko:',':mochi_saijo_juri:',':mochi_morino_rinze:',':mochi_arisugawa_natsuha:',':mochi_osaki_amana:',':mochi_osaki_tenka:',':mochi_kuwayama_chiyuki:',':mochi_serizawa_asahi:',':mochi_mayuzumi_fuyuko:',':mochi_izumi_mei:',':mochi_asakura_toru:',':mochi_higuchi_madoka:',':mochi_fukumaru_koito:',':mochi_ichikawa_hinana:',':mochi_nanakusa_nichika:',':mochi_aketa_mikoto:',':mochi_ikaruga_luca:',':mochi_suzuki_hana:',':mochi_ikuta_haruki:']              # 集計対象の絵文字
+    IMAGE_ONLY = True                 # 画像付きのみ集計する場合
+    SHOW_TOP_USER=True
+
+    today = datetime.date.today()
+    first_day_this_month = today.replace(day=1)
+    first_day_last_month = (first_day_this_month - datetime.timedelta(days=1)).replace(day=1)
+    last_day_last_month = first_day_this_month - datetime.timedelta(days=1)
+
+    from_str = first_day_last_month.strftime('%Y-%m-%d')
+    to_str   = last_day_last_month.strftime('%Y-%m-%d')
+
+    channel = bot.get_channel(CHANNEL_ID)
+    # Botのコマンド実装がasync def collect(ctx, *args)の場合
+    # メッセージ送信からctxを取得
+    msg = await channel.send(f'【自動集計】{from_str}〜{to_str}の集計を開始します。')
+    ctx = await bot.get_context(msg)
+    args = [
+        f'from={from_str}',
+        f'to={to_str}',
+        f'emoji={",".join(EMOJIS)}',
+        f'image_only={str(IMAGE_ONLY)}',
+        f'show_top_user={str(SHOW_TOP_USER)}'
+    ]
+    await collect(ctx, *args)
+
+@bot.event
+async def on_ready():
+    print(f'ログイン完了: {bot.user}')
+    if not hasattr(bot, "scheduler_started"):
+        scheduler = AsyncIOScheduler()
+        # 毎月1日0時に実行
+        scheduler.add_job(monthly_collect_job, 'cron', day=1, hour=0, minute=0)
+        scheduler.start()
+        bot.scheduler_started = True  # 多重起動防止
 
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
