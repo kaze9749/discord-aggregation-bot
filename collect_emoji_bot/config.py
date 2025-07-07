@@ -5,9 +5,7 @@ load_dotenv()  # これで.envファイルを読み込む
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
-
-TARGET_CHANNEL_ID = 1271507705445613589  # 集計の対象となるチャンネルID（＝集計範囲）
-REPORT_CHANNEL_ID = 1374070679158390856  # 集計結果を送信するチャンネルID
+REPORT_CHANNEL_ID = 1391571137258983484  # 集計結果を送信するチャンネルID
 
 
 EMOJIS = [
@@ -19,7 +17,7 @@ EMOJIS = [
     "<:mochi_shirase_sakuya:1275479663191392410>",
     "<:mochi_mitsumine_yuika:1275479632170188944>",
     "<:mochi_yukoku_kiriko:1275479678211063920>",
-    "<:mochi_komiya_kaho~1:1275479621076520981>",
+    "<:mochi_komiya_kaho:1275479621076520981>",
     "<:mochi_sonoda_chiyoko:1275479665364176947>",
     "<:mochi_saijo_juri:1275479648507269150>",
     "<:mochi_morino_rinze:1275479636163297391>",
@@ -39,9 +37,20 @@ EMOJIS = [
     "<:mochi_ikaruga_luca:1275479601836982335>",
     "<:mochi_suzuki_hana:1275479668849643601>",
     "<:mochi_ikuta_haruki:1275479610540429435>",
-    "<:clap:>",
-    "<:emoji_30:1275316913173692487>",
-]  # 集計対象の絵文字
+    
+    "<:G_Saki:1321705562131660823>",
+    "<:G_Temari:1321705609288093726>",
+    "<:G_Kotone:1321705639810170971>",
+    "<:G_Mao:1321705699968946186>",
+    "<:G_Lilja:1324754318716571720>",
+    "<:G_China:1324739167413993534>",
+    "<:G_Sumika:1324739145951612938>",
+    "<:G_Hiro:1321705677730746389>",
+    "<:G_Rinami:1321705739638542407>",
+    "<:G_Ume:1324739746446180362>",
+    "<:G_Misuzu:1321705717346078824>",
+    "<:G_Sena:1321705812082692168>",
+]
 
-IMAGE_ONLY = True  # 画像付きのみ集計する場合
+IMAGE_ONLY = True
 SHOW_TOP_USER = True
