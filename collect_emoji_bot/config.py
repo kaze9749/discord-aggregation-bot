@@ -5,7 +5,7 @@ load_dotenv()  # これで.envファイルを読み込む
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
-REPORT_CHANNEL_ID = 1391571137258983484  # 集計結果を送信するチャンネルID
+REPORT_CHANNEL_ID = 1374070679158390856  # 集計結果を送信するチャンネルID
 
 
 EMOJIS = [

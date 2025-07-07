@@ -51,8 +51,7 @@ def setup_scheduler(bot):
         print(f"ログイン完了: {bot.user}")
         if not hasattr(bot, "scheduler_started"):
             scheduler = AsyncIOScheduler()
-            # テスト用: 毎月7日9時15分に実行
-            # 本番用: 毎月2日0時0分に実行する場合は day=2, hour=0, minute=0 に変更
-            scheduler.add_job(monthly_collect_job, "cron", day=7, hour=10, minute=57)
+            # 本番用: 毎月1日0時0分に実行する場合は day=1, hour=0, minute=0 に変更
+            scheduler.add_job(monthly_collect_job, "cron", day=1, hour=0, minute=0)
             scheduler.start()
             bot.scheduler_started = True  # 多重起動防止
